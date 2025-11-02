@@ -1,0 +1,59 @@
+using UnityEngine;
+
+[RequireComponent(typeof(SpriteRenderer))]
+public class BirdMovement : MonoBehaviour
+{
+    public float speed = 4f;
+    private Vector3 direction = Vector3.right;
+    private float leftEdge, rightEdge;
+    private SpriteRenderer sr;
+
+    void Start()
+    {
+        sr = GetComponent<SpriteRenderer>();
+
+        Camera cam = Camera.main;
+        float camDistance = Mathf.Abs(cam.transform.position.z - transform.position.z);
+        leftEdge = cam.ViewportToWorldPoint(new Vector3(0f, 0.5f, camDistance)).x;
+        rightEdge = cam.ViewportToWorldPoint(new Vector3(1f, 0.5f, camDistance)).x;
+    }
+
+    void Update()
+    {
+        // Move bird
+        transform.Translate(direction * speed * Time.deltaTime);
+
+        // Flip sprite at screen edges
+        if (transform.position.x > rightEdge)
+        {
+            direction = Vector3.left;
+            sr.flipX = true;
+        }
+        else if (transform.position.x < leftEdge)
+        {
+            direction = Vector3.right;
+            sr.flipX = false;
+        }
+    }
+
+    // Handle collisions with pins or player
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Pin"))
+        {
+            // Destroy the pin
+            Destroy(other.gameObject);
+            Debug.Log("💥 Pin hit a bird!");
+            
+            // Optional: restart level if hitting bird kills player
+            GameManager gm = Object.FindFirstObjectByType<GameManager>();
+            if (gm != null) gm.RestartLevel();
+        }
+        else if (other.CompareTag("Player"))
+        {
+            Debug.Log("💀 Player hit the bird!");
+            GameManager gm = Object.FindFirstObjectByType<GameManager>();
+            if (gm != null) gm.RestartLevel();
+        }
+    }
+}
