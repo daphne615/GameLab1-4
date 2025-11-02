@@ -1,0 +1,36 @@
+using UnityEngine;
+
+[RequireComponent(typeof(AudioSource))]
+public class PopOnContact : MonoBehaviour
+{
+    public AudioClip popSound;
+
+    private AudioSource audioSource;
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Balloon"))
+        {
+            // Play pop sound
+            if (audioSource && popSound) audioSource.PlayOneShot(popSound);
+
+            // Call balloon pop
+            BalloonGrowth balloon = other.GetComponent<BalloonGrowth>();
+            if (balloon != null) balloon.Pop();
+
+            // Destroy pin
+            Destroy(gameObject, 0.05f);
+        }
+        else if (other.CompareTag("Distractor") || other.CompareTag("Bird"))
+        {
+            // Hit a distractor/bird → destroy pin, no points
+            Destroy(gameObject);
+            Debug.Log("💥 Pin destroyed by distractor/bird!");
+        }
+    }
+}
