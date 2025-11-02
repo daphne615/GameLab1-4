@@ -1,0 +1,46 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class GameManager : MonoBehaviour
+{
+    public Text scoreText;           // UI text box reference
+    private float score = 0f;
+
+    private void Start()
+    {
+        UpdateScoreDisplay();
+    }
+
+    public void AddScore(float balloonSize)
+    {
+        // Smaller balloon → more points
+        float points = Mathf.Max(1f, 10f - balloonSize * 2f);
+        score += points;
+        UpdateScoreDisplay();
+
+        // After scoring, load next level
+        LoadNextLevel();
+    }
+
+    private void UpdateScoreDisplay()
+    {
+        if (scoreText != null)
+            scoreText.text = "Score: " + Mathf.RoundToInt(score);
+    }
+
+    public void RestartLevel()
+    {
+        Scene current = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(current.buildIndex);
+    }
+
+    public void LoadNextLevel()
+    {
+        int nextIndex = SceneManager.GetActiveScene().buildIndex + 1;
+        if (nextIndex < SceneManager.sceneCountInBuildSettings)
+            SceneManager.LoadScene(nextIndex);
+        else
+            Debug.Log("🏆 All levels complete!");
+    }
+}
